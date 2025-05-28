@@ -1,40 +1,44 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchSchedulesBySearch } from '../api';
 
 const SearchTrip = () => {
   const [tripType, setTripType] = useState('oneway');
+  const [origin, setOrigin] = useState('');
+  const [destination, setDestination] = useState('');
+  const [departure, setDeparture] = useState('');
   const [results, setResults] = useState([]);
   const navigate = useNavigate();
 
-  const handleSearch = () => {
-    setResults([
-      {
-        id: 1,
-        bus: 'RouteMaster',
-        time: '08:00 AM',
-        duration: '6h 20m',
-        arrival: '02:20 PM',
-        price: '$135',
-      },
-      {
-        id: 2,
-        bus: 'TravelGo',
-        time: '09:15 AM',
-        duration: '7h 10m',
-        arrival: '04:25 PM',
-        price: '$150',
-      },
-    ]);
+  const handleSearch = async () => {
+    try {
+      const trips = await fetchSchedulesBySearch({ origin, destination, date: departure });
+      setResults(trips);
+    } catch (err) {
+      alert('❌ Failed to fetch trips: ' + err.message);
+    }
   };
 
   const handleSelectTrip = (trip) => {
-    navigate('/select-seat', { state: trip });
+    const departureTime = new Date(trip.departure_time);
+    const arrivalTime = new Date(departureTime.getTime() + trip.duration * 60000);
+
+    navigate('/select-seat', {
+      state: {
+        id: trip.id,
+        bus: trip.bus_name || trip.bus || 'Unknown Bus',
+        time: departureTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        arrival: arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        duration: `${Math.floor(trip.duration / 60)}h ${trip.duration % 60}m`,
+        price: trip.price ? `Rp ${trip.price.toLocaleString()}` : 'Rp -'
+      }
+    });
   };
+
 
   return (
     <section className="bg-[#0e0e10] min-h-screen py-12 px-6 text-white">
-      <div className="max-w-7xl mx-auto">
-        {/* Switch Tabs */}
+      <div className="mx-auto max-w-7xl">
         <div className="flex justify-center mb-10">
           <button
             onClick={() => setTripType('oneway')}
@@ -54,16 +58,16 @@ const SearchTrip = () => {
           </button>
         </div>
 
-        {/* Form & Result Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Form Panel */}
+        <div className="grid items-start grid-cols-1 gap-12 lg:grid-cols-2">
           <div className="bg-[#1a1a1d] p-8 rounded-3xl shadow-lg w-full">
-            <h2 className="text-3xl font-bold mb-8">Book your Trip</h2>
+            <h2 className="mb-8 text-3xl font-bold">Book your Trip</h2>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">From</label>
+                <label className="block mb-1 text-sm text-gray-400">From</label>
                 <input
+                  value={origin}
+                  onChange={(e) => setOrigin(e.target.value)}
                   type="text"
                   placeholder="Jakarta"
                   className="w-full px-5 py-3 rounded-xl bg-[#2c2c2e] text-white border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -71,18 +75,22 @@ const SearchTrip = () => {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-400 mb-1">To</label>
+                <label className="block mb-1 text-sm text-gray-400">To</label>
                 <input
+                  value={destination}
+                  onChange={(e) => setDestination(e.target.value)}
                   type="text"
                   placeholder="Bandung"
                   className="w-full px-5 py-3 rounded-xl bg-[#2c2c2e] text-white border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Departure</label>
+                  <label className="block mb-1 text-sm text-gray-400">Departure</label>
                   <input
+                    value={departure}
+                    onChange={(e) => setDeparture(e.target.value)}
                     type="date"
                     className="w-full px-5 py-3 rounded-xl bg-[#2c2c2e] text-white"
                   />
@@ -90,7 +98,7 @@ const SearchTrip = () => {
 
                 {tripType === 'roundtrip' && (
                   <div>
-                    <label className="block text-sm text-gray-400 mb-1">Return</label>
+                    <label className="block mb-1 text-sm text-gray-400">Return</label>
                     <input
                       type="date"
                       className="w-full px-5 py-3 rounded-xl bg-[#2c2c2e] text-white"
@@ -101,7 +109,7 @@ const SearchTrip = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Passengers</label>
+                  <label className="block mb-1 text-sm text-gray-400">Passengers</label>
                   <input
                     type="number"
                     min="1"
@@ -111,7 +119,7 @@ const SearchTrip = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Class</label>
+                  <label className="block mb-1 text-sm text-gray-400">Class</label>
                   <select className="w-full px-5 py-3 rounded-xl bg-[#2c2c2e] text-white">
                     <option>Economy</option>
                     <option>Business</option>
@@ -121,16 +129,15 @@ const SearchTrip = () => {
 
               <button
                 onClick={handleSearch}
-                className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition"
+                className="w-full py-3 mt-6 font-bold text-white transition bg-blue-600 hover:bg-blue-700 rounded-xl"
               >
                 Search Trip
               </button>
             </div>
           </div>
 
-          {/* Results Panel */}
           <div>
-            <h3 className="text-2xl font-semibold mb-6">Available Trips</h3>
+            <h3 className="mb-6 text-2xl font-semibold">Available Trips</h3>
             {results.length === 0 ? (
               <p className="text-gray-500">No results yet. Please search above.</p>
             ) : (
@@ -141,16 +148,16 @@ const SearchTrip = () => {
                     className="bg-[#1a1a1d] border border-[#2c2c2e] p-6 rounded-2xl flex flex-col md:flex-row md:items-center md:justify-between"
                   >
                     <div>
-                      <h4 className="text-xl font-semibold mb-1">{trip.bus}</h4>
+                      <h4 className="mb-1 text-xl font-semibold">{trip.bus}</h4>
                       <p className="text-sm text-gray-400">
                         Depart {trip.time} • {trip.duration} • Arrive {trip.arrival}
                       </p>
                     </div>
-                    <div className="mt-4 md:mt-0 flex flex-col items-end gap-2">
-                      <p className="text-blue-400 text-2xl font-bold">{trip.price}</p>
+                    <div className="flex flex-col items-end gap-2 mt-4 md:mt-0">
+                      <p className="text-2xl font-bold text-blue-400">{trip.price}</p>
                       <button
                         onClick={() => handleSelectTrip(trip)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-xl"
+                        className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-xl"
                       >
                         Select Seat
                       </button>

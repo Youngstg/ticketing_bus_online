@@ -18,6 +18,14 @@ import Register from './pages/Register';
 import History from './pages/History';
 import Payment from './pages/Payment';
 import Dashboard from './pages/admin/Dashboard';
+import BusList from "./components/bus/BusList";
+import AddBusForm from "./components/bus/AddBusForm";
+import RouteList from "./components/route/RouteList";
+import AddRouteForm from "./components/route/AddRouteForm";
+import AddScheduleForm from "./components/schedule/AddScheduleForm";
+import ScheduleList from "./components/schedule/ScheduleList";
+import SeatFormWrapper from "./components/seat/SeatFormWrapper";
+
 
 function AppWrapper() {
   const [user, setUser] = useState(null);
@@ -62,6 +70,45 @@ function AppWrapper() {
         <Route
           path="/admin/dashboard"
           element={<Dashboard user={user} orders={orders} />}
+        />
+        <Route
+          path="/admin/buses"
+          element={
+            <div className="p-4 space-y-4">
+              <h2 className="text-xl font-bold">Manajemen Bus</h2>
+              <AddBusForm />
+              <BusList />
+            </div>
+          }
+        />
+        <Route
+          path="/admin/routes"
+          element={
+            <div className="p-4 space-y-4">
+              <h2 className="text-xl font-bold">Manajemen Rute</h2>
+              <AddRouteForm />
+              <RouteList />
+            </div>
+          }
+        />
+        <Route
+          path="/admin/schedules"
+          element={
+            <div className="p-4 space-y-4">
+              <h2 className="text-xl font-bold">Manajemen Jadwal</h2>
+              <AddScheduleForm />
+              <ScheduleList />
+            </div>
+          }
+        />
+        <Route
+          path="/admin/seats/:scheduleId"
+          element={
+            <div className="p-4 space-y-4">
+              <h2 className="text-xl font-bold">Manajemen Kursi</h2>
+              <SeatFormWrapper />
+            </div>
+          }
         />
       </Routes>
     </div>
