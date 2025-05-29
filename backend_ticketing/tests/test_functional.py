@@ -1,13 +1,10 @@
-from backend_ticketing import models
+def test_homepage(app):
+    res = app.get("/", status=200)
+    assert "Whiish Bus Ticketing API" in res.text
 
-def test_my_view_success(testapp, dbsession):
-    model = models.MyModel(name='one', value=55)
-    dbsession.add(model)
-    dbsession.flush()
 
-    res = testapp.get('/', status=200)
-    assert res.body
-
-def test_notfound(testapp):
-    res = testapp.get('/badurl', status=404)
-    assert res.status_code == 404
+def test_get_buses(app):
+    res = app.get("/api/buses", status=200)
+    data = res.json
+    assert isinstance(data, list)
+    assert data[0]['name'] == "Sinar Jaya"

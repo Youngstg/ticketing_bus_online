@@ -52,10 +52,12 @@ function AppWrapper() {
 
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
 
   return (
     <div className="min-h-screen text-gray-900 bg-white">
-      {!isAdminRoute && <Navbar user={user} setUser={setUser} />}
+      {!isAdminRoute && !isAuthPage && <Navbar user={user} setUser={setUser} />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/tickets" element={<Tickets />} />

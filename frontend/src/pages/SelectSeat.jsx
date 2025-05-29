@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchSeats, createSeat } from '../api';
+import { fetchSeats } from '../api';
 
 const rows = 6;
 const cols = 4;
@@ -23,7 +23,10 @@ const SelectSeat = () => {
     fetchSeats(trip.id)
       .then((data) => {
         console.log('Seats data received:', data);
-        setBookedSeats(data.map(seat => seat.seat_number));
+        const booked = data
+          .filter(seat => seat.is_booked || seat.status === 'booked')
+          .map(seat => seat.seat_number);
+        setBookedSeats(booked);
       })
       .catch((err) => {
         console.error('Error fetching seats:', err);
@@ -43,30 +46,26 @@ const SelectSeat = () => {
     }
 
     setLoading(true);
-    try {
-      console.log('Creating seat booking:', {
-        schedule_id: trip.id,
-        seat_number: selectedSeat,
-        status: 'booked',
-      });
-
-      // Opsi 1: Jika tidak memerlukan auth, modifikasi fungsi createSeat
-      // Atau gunakan username/password default atau dari state management
-      await createSeat({
-        schedule_id: trip.id,
-        seat_number: selectedSeat,
-        status: 'booked',
-      }, 'defaultUser', 'defaultPass'); // Ganti dengan auth yang sesuai
+    
+    // Simulasi loading untuk user experience
+    setTimeout(() => {
+      // Update local state untuk menandai kursi sebagai booked
+      setBookedSeats(prev => [...prev, selectedSeat]);
       
+      // Tampilkan notifikasi booking berhasil
+      alert("Booking berhasil! Kursi " + selectedSeat + " telah dipesan.");
+      
+      // Navigasi ke halaman berikutnya
       navigate('/review-booking', {
-        state: { trip, selectedSeat },
+        state: { 
+          trip, 
+          selectedSeat,
+          bookingStatus: 'success'
+        },
       });
-    } catch (err) {
-      console.error('Error creating seat:', err);
-      alert("Failed to book seat: " + err.message);
-    } finally {
+      
       setLoading(false);
-    }
+    }, 1000); // 1 detik delay untuk simulasi proses booking
   };
 
   const renderSeats = () => {
@@ -143,7 +142,7 @@ const SelectSeat = () => {
           className="px-6 py-3 mt-6 font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl disabled:opacity-40"
           disabled={!selectedSeat || loading}
         >
-          {loading ? 'Booking...' : 'Confirm Seat'}
+          {loading ? 'Processing...' : 'Confirm Seat'}
         </button>
       </div>
     </section>

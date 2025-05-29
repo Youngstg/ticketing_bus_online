@@ -1,20 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import TicketCard from '../components/TicketCard';
+import { fetchTickets } from '../api';
 
 const Tickets = () => {
-  const tickets = [
-    { id: '1', from: 'Jakarta', to: 'Bandung', time: '16:20', date: '2025-06-01', seat: '13' },
-    { id: '2', from: 'Solo', to: 'Yogyakarta', time: '14:00', date: '2025-06-03', seat: '22' },
-  ];
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+  fetchTickets()
+    .then(data => {
+      const filtered = data.filter(t => t.customer_name === 'Lucky');
+      setTickets(filtered);
+    })
+    .catch(err => alert("Gagal memuat tiket: " + err.message))
+    .finally(() => setLoading(false));
+}, []);
+
 
   return (
     <div className="bg-[#0e0e10] text-white p-6 min-h-screen">
-      <h2 className="text-3xl font-bold mb-6">Your Tickets</h2>
-      <div className="space-y-4">
-        {tickets.map(ticket => (
-          <TicketCard key={ticket.id} ticket={ticket} />
-        ))}
-      </div>
+      <h2 className="mb-6 text-3xl font-bold">Your Tickets</h2>
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <div className="space-y-4">
+          {tickets.length === 0 ? (
+            <p>No tickets found.</p>
+          ) : (
+            tickets.map(ticket => (
+              <TicketCard key={ticket.id} ticket={ticket} />
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 };

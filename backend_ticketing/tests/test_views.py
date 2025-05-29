@@ -1,23 +1,22 @@
-from backend_ticketing import models
-from backend_ticketing.views.default import my_view
-from backend_ticketing.views.notfound import notfound_view
+from pyramid.testing import DummyRequest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from backend_ticketing.models.meta import Base
+from backend_ticketing.models import Bus
+from backend_ticketing.views.bus import get_buses
 
+def test_get_buses_view():
+    engine = create_engine('sqlite:///:memory:')
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
-def test_my_view_failure(app_request):
-    info = my_view(app_request)
-    assert info.status_int == 500
+    session.add(Bus(name="TestBus", license_plate="B 2222 ZZ"))
+    session.commit()
 
-def test_my_view_success(app_request, dbsession):
-    model = models.MyModel(name='one', value=55)
-    dbsession.add(model)
-    dbsession.flush()
+    request = DummyRequest()
+    request.dbsession = session
 
-    info = my_view(app_request)
-    assert app_request.response.status_int == 200
-    assert info['one'].name == 'one'
-    assert info['project'] == 'backend_ticketing'
-
-def test_notfound_view(app_request):
-    info = notfound_view(app_request)
-    assert app_request.response.status_int == 404
-    assert info == {}
+    result = get_buses(request)
+    assert isinstance(result, list)
+    assert result[0]['name'] == "TestBus"

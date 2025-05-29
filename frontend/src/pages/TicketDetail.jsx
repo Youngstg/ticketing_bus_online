@@ -1,32 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { fetchTicketDetail } from '../api';
 
 const TicketDetail = () => {
   const { id } = useParams();
-  const ticket = {
-    id,
-    from: 'Jakarta',
-    to: 'Bandung',
-    time: '16:20',
-    date: '2025-06-01',
-    seat: '13',
-    route: 'E58',
-    station: 'Central Station',
-    price: 'Rp150.000',
-  };
+  const [ticket, setTicket] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTicketDetail(id)
+      .then(setTicket)
+      .catch(err => alert("Gagal memuat detail tiket: " + err.message))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return <p className="p-6 text-white">Loading...</p>;
+  if (!ticket) return <p className="p-6 text-white">Ticket not found</p>;
 
   return (
     <div className="bg-[#0e0e10] text-white min-h-screen p-6">
-      <h2 className="text-3xl font-bold mb-6">Ticket Detail</h2>
+      <h2 className="mb-6 text-3xl font-bold">Ticket Detail</h2>
       <div className="bg-[#1a1a1d] p-6 rounded-lg shadow-md border border-[#2c2c2e] space-y-2">
-        <p><strong>From:</strong> {ticket.from}</p>
-        <p><strong>To:</strong> {ticket.to}</p>
-        <p><strong>Date:</strong> {ticket.date}</p>
-        <p><strong>Time:</strong> {ticket.time}</p>
-        <p><strong>Seat:</strong> {ticket.seat}</p>
-        <p><strong>Route:</strong> {ticket.route}</p>
-        <p><strong>Station:</strong> {ticket.station}</p>
-        <p><strong>Total Price:</strong> {ticket.price}</p>
+        <p><strong>Customer:</strong> {ticket.customer_name}</p>
+        <p><strong>Booking Code:</strong> {ticket.booking_code}</p>
+        <p><strong>Status:</strong> {ticket.status}</p>
+        <p><strong>Seat:</strong> {ticket.seat_number}</p>
+        <p><strong>From:</strong> {ticket.origin}</p>
+        <p><strong>To:</strong> {ticket.destination}</p>
+        <p><strong>Departure Time:</strong> {ticket.departure_time}</p>
+        <p><strong>Bus:</strong> {ticket.bus_name}</p>
+        <p><strong>Total Price:</strong> Rp{ticket.price}</p>
       </div>
     </div>
   );

@@ -1,12 +1,25 @@
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker, configure_mappers
+from .mymodel import Bus, Route, Schedule, Seat, Ticket  # dll
+
+
+
+
 import zope.sqlalchemy
+from .meta import Base
+from sqlalchemy.orm import sessionmaker
+Session = sessionmaker()
+
+def initialize_sql(engine):
+    Session.configure(bind=engine)
+    Base.metadata.create_all(engine)
+
 
 # Ekspor DBSession dan Base dari meta
 from .meta import DBSession, Base
 
 # Import semua model
-from .mymodel import Bus, Route, Schedule, Seat, Ticket # , Seat, Ticket
+from .mymodel import Bus, Route, Schedule, Seat, Ticket 
 
 # Pastikan semua relasi terkonfigurasi sebelum digunakan
 configure_mappers()

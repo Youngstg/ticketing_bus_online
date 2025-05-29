@@ -1,9 +1,11 @@
 def includeme(config):
     config.add_static_view('static', 'static', cache_max_age=3600)
+    config.add_route('home', '/')
+
 
     # BUSES
     config.add_route('bus_list', '/api/buses')                    # GET semua
-    config.add_route('bus_create', '/api/buses/create')  # <== ini WAJIB          # POST baru
+    config.add_route('bus_create', '/api/buses/create')           # POST baru
     config.add_route('bus_detail', '/api/buses/detail/{id}')      # GET satu
     config.add_route('bus_update', '/api/buses/update/{id}')      # PUT
     config.add_route('bus_delete', '/api/buses/delete/{id}')      # DELETE
@@ -23,8 +25,6 @@ def includeme(config):
     config.add_route('schedule_delete', '/api/schedules/delete/{id}')
     config.add_route('schedule_search', '/api/schedules/search')
 
-    
-
     # SEATS
     config.add_route('seat_list', '/api/seats/{schedule_id}')
     config.add_route('seat_create', '/api/seats/create')
@@ -38,12 +38,3 @@ def includeme(config):
     config.add_route('ticket_detail', '/api/tickets/detail/{id}')
     config.add_route('ticket_update', '/api/tickets/update/{id}')
     config.add_route('ticket_delete', '/api/tickets/delete/{id}')
-
-from pyramid.response import Response
-from pyramid.view import view_config
-
-@view_config(route_name='route_create', request_method='OPTIONS')
-def route_create_options(request):
-    return Response(status=200)
-
-

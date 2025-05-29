@@ -1,7 +1,12 @@
-# # backend_ticketing/views/default.py
-# from pyramid.view import view_config
-# from pyramid.response import Response
-# from ..models.mymodel import Bus # Impor model yang relevan
+# backend_ticketing/views/default.py
+from pyramid.view import view_config
+from pyramid.response import Response
+from ..models.mymodel import Bus # Impor model yang relevan
+
+@view_config(route_name='home', renderer='json')
+def home_view(request):
+    return {'message': 'Welcome to Whiish Bus Ticketing API'}
+
 
 # @view_config(route_name='home', renderer='../templates/mytemplate.jinja2')
 # def home_view(request):

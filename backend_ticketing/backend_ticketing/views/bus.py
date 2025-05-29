@@ -1,6 +1,8 @@
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPCreated
 from backend_ticketing.models import Bus
+from pyramid.response import Response
+
 import logging
 import transaction
 # ... (import lainnya dan model Bus) ...
@@ -11,7 +13,7 @@ log = logging.getLogger(__name__) # Pastikan ini ada
 @view_config(route_name='bus_list', renderer='json', request_method='GET')
 def get_buses(request):
     buses = request.dbsession.query(Bus).all()
-    return [{'id': b.id, 'name': b.name, 'license_plate': b.license_plate} for b in buses]
+    return [{"id": b.id, "name": b.name, "license_plate": b.license_plate} for b in buses]
 
 
 from backend_ticketing.views.auth import check_basic_auth
@@ -25,6 +27,10 @@ def create_bus(request):
     request.dbsession.add(bus)
     request.dbsession.flush()
     return HTTPCreated(json_body={'message': 'Bus created', 'id': bus.id})
+
+@view_config(route_name='bus_create', request_method='OPTIONS')
+def bus_create_options(request):
+    return Response(status=200)
 
 
 @view_config(route_name='bus_detail', renderer='json', request_method='GET')

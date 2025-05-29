@@ -63,7 +63,26 @@ export async function fetchSeats(scheduleId) {
   return res.json();
 }
 
-export async function createSeat(data, username, password) {
+// Seat booking untuk customer (tidak perlu auth)
+export async function createSeat(data) {
+  const res = await fetch(`${BASE_URL}/api/seats/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Failed to create seat" }));
+    throw new Error(err.error || "Failed to create seat");
+  }
+
+  return res.json();
+}
+
+// Seat management untuk admin (perlu auth)
+export async function createSeatAdmin(data, username, password) {
   const auth = btoa(`${username}:${password}`);
   const res = await fetch(`${BASE_URL}/api/seats/create`, {
     method: "POST",
@@ -75,15 +94,22 @@ export async function createSeat(data, username, password) {
   });
 
   if (!res.ok) {
-    const err = await res.text(); // gunakan .text() jika response bukan JSON
-    throw new Error(err || "Failed to create seat");
+    const err = await res.json().catch(() => ({ error: "Failed to create seat" }));
+    throw new Error(err.error || "Failed to create seat");
   }
 
   return res.json();
 }
 
-
 export async function fetchSchedulesBySearch({ origin, destination, date }) {
   const params = new URLSearchParams({ origin, destination, date });
   return fetch(`${BASE_URL}/api/schedules/search?${params.toString()}`).then(handleError);
+}
+
+export async function fetchTickets() {
+  return fetch(`${BASE_URL}/api/tickets`).then(handleError);
+}
+
+export async function fetchTicketDetail(id) {
+  return fetch(`${BASE_URL}/api/tickets/detail/${id}`).then(handleError);
 }

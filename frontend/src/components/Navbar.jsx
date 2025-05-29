@@ -1,9 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import logo from '../assets/logo.png'; // logo kamu
+import { Link, useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.png'; // Ganti sesuai path logo Anda
 
 const Navbar = ({ user, setUser }) => {
-  const handleLogout = () => setUser(null);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    setUser(null);         // Hapus data user (logout)
+    navigate('/login');    // Arahkan ke halaman login
+  };
 
   return (
     <nav className="bg-[#0e0e10] text-white px-6 py-4 flex justify-between items-center">
@@ -13,7 +18,7 @@ const Navbar = ({ user, setUser }) => {
         <Link to="/" className="text-xl font-bold hover:text-blue-400">Whiish</Link>
       </div>
 
-      {/* Tengah: Menu utama */}
+      {/* Tengah: Navigasi */}
       <div className="absolute hidden gap-8 text-sm font-medium -translate-x-1/2 md:flex left-1/2">
         <Link to="/" className="hover:text-blue-400">Home</Link>
         <Link to="/search" className="hover:text-blue-400">Search</Link>
@@ -21,7 +26,7 @@ const Navbar = ({ user, setUser }) => {
         <Link to="/history" className="hover:text-blue-400">History</Link>
       </div>
 
-      {/* Kanan: Auth */}
+      {/* Kanan: Login/Register atau Logout */}
       <div className="flex items-center gap-4 ml-auto text-sm">
         {!user ? (
           <>
