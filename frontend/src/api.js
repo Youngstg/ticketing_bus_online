@@ -81,22 +81,48 @@ export async function createSeat(data) {
   return res.json();
 }
 
+// Fixed bookSeat function using fetch instead of axios
 export const bookSeat = async (seatId) => {
   try {
-    const response = await axiosInstance.put(`/api/seat/${seatId}/book`, { is_booked: true });
-    return response.data;
+    const response = await fetch(`${BASE_URL}/api/seat/${seatId}/book`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ is_booked: true })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Failed to book seat' }));
+      throw new Error(errorData.error || 'Failed to book seat');
+    }
+
+    return response.json();
   } catch (error) {
-    console.error('Error booking seat:', error.response ? error.response.data : error.message);
+    console.error('Error booking seat:', error.message);
     throw error;
   }
 };
 
+// Fixed createTicket function using fetch instead of axios
 export const createTicket = async (ticketData) => {
   try {
-    const response = await axiosInstance.post('/api/ticket', ticketData);
-    return response.data;
+    const response = await fetch(`${BASE_URL}/api/ticket`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(ticketData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Failed to create ticket' }));
+      throw new Error(errorData.error || 'Failed to create ticket');
+    }
+
+    return response.json();
   } catch (error) {
-    console.error('Error creating ticket:', error.response ? error.response.data : error.message);
+    console.error('Error creating ticket:', error.message);
     throw error;
   }
 };
@@ -113,3 +139,56 @@ export async function fetchTickets() {
 export async function fetchTicketDetail(id) {
   return fetch(`${BASE_URL}/api/tickets/detail/${id}`).then(handleError);
 }
+
+// Add missing functions that your components need
+export async function fetchScheduleDetail(scheduleId) {
+  return fetch(`${BASE_URL}/api/schedule/${scheduleId}`).then(handleError);
+}
+
+export async function fetchBusSeats(busId) {
+  return fetch(`${BASE_URL}/api/bus/${busId}/seats`).then(handleError);
+}
+
+// Create an api object with all functions for easier usage
+const api = {
+  get: async (url) => {
+    return fetch(`${BASE_URL}${url}`).then(handleError);
+  },
+  post: async (url, data) => {
+    return fetch(`${BASE_URL}${url}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    }).then(handleError);
+  },
+  put: async (url, data) => {
+    return fetch(`${BASE_URL}${url}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    }).then(handleError);
+  },
+  // All the specific functions
+  fetchBuses,
+  createBus,
+  fetchRoutes,
+  createRoute,
+  fetchSchedules,
+  createSchedule,
+  fetchSeats,
+  createSeat,
+  bookSeat,
+  createTicket,
+  fetchSchedulesBySearch,
+  fetchTickets,
+  fetchTicketDetail,
+  fetchScheduleDetail,
+  fetchBusSeats
+};
+
+// Export as default
+export default api;

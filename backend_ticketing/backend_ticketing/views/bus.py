@@ -2,7 +2,6 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPCreated, HTTPUnauthorized
 from backend_ticketing.models import Bus
 from pyramid.response import Response
-from pyramid.security import authenticated_userid
 
 import logging
 import transaction
