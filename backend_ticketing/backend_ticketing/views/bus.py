@@ -1,7 +1,8 @@
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPCreated
+from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPCreated, HTTPUnauthorized
 from backend_ticketing.models import Bus
 from pyramid.response import Response
+from pyramid.security import has_permission
 
 import logging
 import transaction
@@ -16,11 +17,11 @@ def get_buses(request):
     return [{"id": b.id, "name": b.name, "license_plate": b.license_plate} for b in buses]
 
 
-from backend_ticketing.views.auth import check_basic_auth
-
 @view_config(route_name='bus_create', renderer='json', request_method='POST')
 def create_bus(request):
-    check_basic_auth(request)  # ⬅️ Cek admin dulu
+    # Check if user has permission to create buses
+    if not has_permission('api_access', request.context, request):
+        raise HTTPUnauthorized(json_body={'error': 'Authentication required'})
 
     data = request.json_body
     bus = Bus(name=data['name'], license_plate=data['license_plate'])

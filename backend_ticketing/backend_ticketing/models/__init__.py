@@ -1,6 +1,6 @@
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker, configure_mappers
-from .mymodel import Bus, Route, Schedule, Seat, Ticket  # dll
+from .mymodel import User, Bus, Route, Schedule, Seat, Ticket  # dll
 
 
 
@@ -19,7 +19,7 @@ def initialize_sql(engine):
 from .meta import DBSession, Base
 
 # Import semua model
-from .mymodel import Bus, Route, Schedule, Seat, Ticket 
+from .mymodel import User, Bus, Route, Schedule, Seat, Ticket 
 
 # Pastikan semua relasi terkonfigurasi sebelum digunakan
 configure_mappers()

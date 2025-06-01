@@ -2,6 +2,10 @@ def includeme(config):
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('home', '/')
 
+    # AUTH ROUTES
+    config.add_route('login', '/api/auth/login')
+    config.add_route('register', '/api/auth/register')
+    config.add_route('logout', '/api/auth/logout')
 
     # BUSES
     config.add_route('bus_list', '/api/buses')                    # GET semua
