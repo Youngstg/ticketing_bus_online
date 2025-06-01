@@ -63,6 +63,23 @@ export async function fetchSeats(scheduleId) {
   return res.json();
 }
 
+// Seat booking untuk customer (tidak perlu auth)
+export async function createSeat(data) {
+  const res = await fetch(`${BASE_URL}/api/seats/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Failed to create seat" }));
+    throw new Error(err.error || "Failed to create seat");
+  }
+
+  return res.json();
+}
 
 export const bookSeat = async (seatId) => {
   try {
