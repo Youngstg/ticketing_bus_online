@@ -2,39 +2,35 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPCreated, HTTPUnauthorized
 from backend_ticketing.models import Bus
 from pyramid.response import Response
-from pyramid.security import has_permission
+from pyramid.security import authenticated_userid
 
 import logging
 import transaction
-# ... (import lainnya dan model Bus) ...
 
-log = logging.getLogger(__name__) # Pastikan ini ada
+log = logging.getLogger(__name__)
 
 
-@view_config(route_name='bus_list', renderer='json', request_method='GET')
+@view_config(route_name='bus_list', renderer='json', request_method='GET', permission='api_access')
 def get_buses(request):
     buses = request.dbsession.query(Bus).all()
     return [{"id": b.id, "name": b.name, "license_plate": b.license_plate} for b in buses]
 
 
-@view_config(route_name='bus_create', renderer='json', request_method='POST')
+@view_config(route_name='bus_create', renderer='json', request_method='POST', permission='api_access')
 def create_bus(request):
-    # Check if user has permission to create buses
-    if not has_permission('api_access', request.context, request):
-        raise HTTPUnauthorized(json_body={'error': 'Authentication required'})
-
     data = request.json_body
     bus = Bus(name=data['name'], license_plate=data['license_plate'])
     request.dbsession.add(bus)
     request.dbsession.flush()
     return HTTPCreated(json_body={'message': 'Bus created', 'id': bus.id})
 
+
 @view_config(route_name='bus_create', request_method='OPTIONS')
 def bus_create_options(request):
     return Response(status=200)
 
 
-@view_config(route_name='bus_detail', renderer='json', request_method='GET')
+@view_config(route_name='bus_detail', renderer='json', request_method='GET', permission='api_access')
 def get_bus(request):
     bus_id = request.matchdict.get('id')
     bus = request.dbsession.query(Bus).get(bus_id)
@@ -43,7 +39,7 @@ def get_bus(request):
     return {'id': bus.id, 'name': bus.name, 'license_plate': bus.license_plate}
 
 
-@view_config(route_name='bus_update', renderer='json', request_method='PUT')
+@view_config(route_name='bus_update', renderer='json', request_method='PUT', permission='api_access')
 def update_bus(request):
     bus_id = request.matchdict.get('id')
     log.info(f"=== UPDATE BUS START - ID: {bus_id} ===")
@@ -111,7 +107,7 @@ def update_bus(request):
     }
 
 
-@view_config(route_name='bus_delete', renderer='json', request_method='DELETE')
+@view_config(route_name='bus_delete', renderer='json', request_method='DELETE', permission='api_access')
 def delete_bus(request):
     bus_id = request.matchdict.get('id')
     bus = request.dbsession.query(Bus).get(bus_id)

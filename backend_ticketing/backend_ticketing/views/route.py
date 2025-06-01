@@ -2,7 +2,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPCreated
 from backend_ticketing.models import Route
 
-@view_config(route_name='route_list', renderer='json', request_method='GET')
+@view_config(route_name='route_list', renderer='json', request_method='GET', permission='api_access')
 def get_routes(request):
     routes = request.dbsession.query(Route).all()
     return [
@@ -10,7 +10,7 @@ def get_routes(request):
         for r in routes
     ]
 
-@view_config(route_name='route_create', renderer='json', request_method='POST')
+@view_config(route_name='route_create', renderer='json', request_method='POST', permission='api_access')
 def create_route(request):
     try:
         data = request.json_body
@@ -25,7 +25,7 @@ def create_route(request):
     except Exception as e:
         raise HTTPBadRequest(json_body={'error': str(e)})
 
-@view_config(route_name='route_detail', renderer='json', request_method='GET')
+@view_config(route_name='route_detail', renderer='json', request_method='GET', permission='api_access')
 def get_route(request):
     id = request.matchdict['id']
     route = request.dbsession.get(Route, id)
@@ -38,7 +38,7 @@ def get_route(request):
         'duration': route.duration
     }
 
-@view_config(route_name='route_update', renderer='json', request_method='PUT')
+@view_config(route_name='route_update', renderer='json', request_method='PUT', permission='api_access')
 def update_route(request):
     id = request.matchdict['id']
     route = request.dbsession.get(Route, id)
@@ -51,7 +51,7 @@ def update_route(request):
     route.duration = data.get('duration', route.duration)
     return {'message': 'Route updated'}
 
-@view_config(route_name='route_delete', renderer='json', request_method='DELETE')
+@view_config(route_name='route_delete', renderer='json', request_method='DELETE', permission='api_access')
 def delete_route(request):
     id = request.matchdict['id']
     route = request.dbsession.get(Route, id)

@@ -4,6 +4,7 @@ from backend_ticketing.models import Seat
 
 @view_config(route_name='seat_list', renderer='json', request_method='GET')
 def get_seats(request):
+    """Public endpoint to view available seats - no authentication required"""
     schedule_id = request.matchdict.get('schedule_id')
     seats = request.dbsession.query(Seat).filter_by(schedule_id=schedule_id).all()
     return [
@@ -16,7 +17,7 @@ def get_seats(request):
         for s in seats
     ]
 
-@view_config(route_name='seat_create', renderer='json', request_method='POST')
+@view_config(route_name='seat_create', renderer='json', request_method='POST', permission='api_access')
 def create_seat(request):
     try:
         data = request.json_body
@@ -60,7 +61,7 @@ def create_seat(request):
 def seat_create_options(request):
     return {}
 
-@view_config(route_name='seat_detail', renderer='json', request_method='GET')
+@view_config(route_name='seat_detail', renderer='json', request_method='GET', permission='api_access')
 def get_seat(request):
     s = request.dbsession.get(Seat, request.matchdict['id'])
     if not s:
@@ -72,7 +73,7 @@ def get_seat(request):
         'is_booked': s.is_booked
     }
 
-@view_config(route_name='seat_update', renderer='json', request_method='PUT')
+@view_config(route_name='seat_update', renderer='json', request_method='PUT', permission='api_access')
 def update_seat(request):
     s = request.dbsession.get(Seat, request.matchdict['id'])
     if not s:
@@ -83,7 +84,7 @@ def update_seat(request):
     s.is_booked = data.get('is_booked', s.is_booked)
     return {'message': 'Seat updated'}
 
-@view_config(route_name='seat_delete', renderer='json', request_method='DELETE')
+@view_config(route_name='seat_delete', renderer='json', request_method='DELETE', permission='api_access')
 def delete_seat(request):
     s = request.dbsession.get(Seat, request.matchdict['id'])
     if not s:

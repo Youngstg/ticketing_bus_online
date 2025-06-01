@@ -5,8 +5,7 @@ from sqlalchemy.sql import cast
 from sqlalchemy.types import Date
 
 
-
-@view_config(route_name='schedule_list', renderer='json', request_method='GET')
+@view_config(route_name='schedule_list', renderer='json', request_method='GET', permission='api_access')
 def get_schedules(request):
     schedules = request.dbsession.query(Schedule).all()
     return [
@@ -14,11 +13,12 @@ def get_schedules(request):
             'id': s.id,
             'bus_id': s.bus_id,
             'route_id': s.route_id,
-            'departure_time': s.departure_time.isoformat()
+            'departure_time': s.departure_time.isoformat(),
+            'price': s.price
         } for s in schedules
     ]
 
-@view_config(route_name='schedule_create', renderer='json', request_method='POST')
+@view_config(route_name='schedule_create', renderer='json', request_method='POST', permission='api_access')
 def create_schedule(request):
     try:
         data = request.json_body
@@ -34,7 +34,7 @@ def create_schedule(request):
     except Exception as e:
         raise HTTPBadRequest(json_body={'error': str(e)})
 
-@view_config(route_name='schedule_detail', renderer='json', request_method='GET')
+@view_config(route_name='schedule_detail', renderer='json', request_method='GET', permission='api_access')
 def get_schedule(request):
     s = request.dbsession.get(Schedule, request.matchdict['id'])
     if not s:
@@ -43,10 +43,11 @@ def get_schedule(request):
         'id': s.id,
         'bus_id': s.bus_id,
         'route_id': s.route_id,
-        'departure_time': s.departure_time.isoformat()
+        'departure_time': s.departure_time.isoformat(),
+        'price': s.price
     }
 
-@view_config(route_name='schedule_update', renderer='json', request_method='PUT')
+@view_config(route_name='schedule_update', renderer='json', request_method='PUT', permission='api_access')
 def update_schedule(request):
     s = request.dbsession.get(Schedule, request.matchdict['id'])
     if not s:
@@ -56,9 +57,10 @@ def update_schedule(request):
     s.bus_id = data.get('bus_id', s.bus_id)
     s.route_id = data.get('route_id', s.route_id)
     s.departure_time = data.get('departure_time', s.departure_time)
+    s.price = data.get('price', s.price)
     return {'message': 'Schedule updated'}
 
-@view_config(route_name='schedule_delete', renderer='json', request_method='DELETE')
+@view_config(route_name='schedule_delete', renderer='json', request_method='DELETE', permission='api_access')
 def delete_schedule(request):
     s = request.dbsession.get(Schedule, request.matchdict['id'])
     if not s:
@@ -68,6 +70,7 @@ def delete_schedule(request):
 
 @view_config(route_name='schedule_search', renderer='json', request_method='GET')
 def search_schedules(request):
+    """Public endpoint for searching schedules - no authentication required"""
     origin = request.GET.get('origin')
     destination = request.GET.get('destination')
     date = request.GET.get('date')
@@ -90,9 +93,8 @@ def search_schedules(request):
             'origin': s.route.origin,
             'destination': s.route.destination,
             'departure_time': s.departure_time.isoformat(),
-            'duration': s.route.duration,  # asumsi `duration` ada di Route (bukan Schedule)
-            'price': s.price, # asumsi harga per rute (bisa juga pindahkan ke Schedule jika perlu)
+            'duration': s.route.duration,
+            'price': s.price,
         }
         for s in results
     ]
-
