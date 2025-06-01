@@ -63,43 +63,26 @@ export async function fetchSeats(scheduleId) {
   return res.json();
 }
 
-// Seat booking untuk customer (tidak perlu auth)
-export async function createSeat(data) {
-  const res = await fetch(`${BASE_URL}/api/seats/create`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Failed to create seat" }));
-    throw new Error(err.error || "Failed to create seat");
+export const bookSeat = async (seatId) => {
+  try {
+    const response = await axiosInstance.put(`/api/seat/${seatId}/book`, { is_booked: true });
+    return response.data;
+  } catch (error) {
+    console.error('Error booking seat:', error.response ? error.response.data : error.message);
+    throw error;
   }
+};
 
-  return res.json();
-}
-
-// Seat management untuk admin (perlu auth)
-export async function createSeatAdmin(data, username, password) {
-  const auth = btoa(`${username}:${password}`);
-  const res = await fetch(`${BASE_URL}/api/seats/create`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Basic ${auth}`
-    },
-    body: JSON.stringify(data)
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Failed to create seat" }));
-    throw new Error(err.error || "Failed to create seat");
+export const createTicket = async (ticketData) => {
+  try {
+    const response = await axiosInstance.post('/api/ticket', ticketData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating ticket:', error.response ? error.response.data : error.message);
+    throw error;
   }
-
-  return res.json();
-}
+};
 
 export async function fetchSchedulesBySearch({ origin, destination, date }) {
   const params = new URLSearchParams({ origin, destination, date });
